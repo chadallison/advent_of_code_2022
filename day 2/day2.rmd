@@ -1,0 +1,168 @@
+---
+title: "advent of code - day 2"
+author: "chad allison | 2 december 2022"
+output: github_document
+---
+
+### loading in tidyverse
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### loading in input file
+
+```{r}
+input = readLines("day2_input.txt")
+```
+
+### previewing input file
+
+```{r}
+input[1:100]
+```
+
+### formatting the input into a data frame to manipulate
+
+```{r}
+df = data.frame(input) |>
+  separate(input, into = c("opponent", "me"), sep = " ")
+
+head(df)
+```
+
+### converting letters to choices for quality of life
+
+```{r}
+df = df |>
+  mutate(opponent_choice = case_when(opponent == "A" ~ "rock",
+                                     opponent == "B" ~ "paper",
+                                     opponent == "C" ~ "scissors"),
+         me_choice = case_when(me == "X" ~ "rock",
+                               me == "Y" ~ "paper",
+                               me == "Z" ~ "scissors"))
+
+head(df)
+```
+
+### creating winner variable
+
+```{r}
+df = df |>
+  mutate(winner = case_when(opponent_choice == "paper" & me_choice == "paper" ~ "draw",
+                            opponent_choice == "paper" & me_choice == "rock" ~ "opponent",
+                            opponent_choice == "paper" & me_choice == "scissors" ~ "me",
+                            opponent_choice == "rock" & me_choice == "paper" ~ "me",
+                            opponent_choice == "rock" & me_choice == "rock" ~ "draw",
+                            opponent_choice == "rock" & me_choice == "scissors" ~ "opponent",
+                            opponent_choice == "scissors" & me_choice == "paper" ~ "opponent",
+                            opponent_choice == "scissors" & me_choice == "rock" ~ "me",
+                            opponent_choice == "scissors" & me_choice == "scissors" ~ "draw"))
+
+head(df)
+```
+
+### calculating score
+
+```{r}
+df = df |>
+  mutate(score = 0,
+         score = case_when(me_choice == "rock" ~ score + 1,
+                           me_choice == "paper" ~ score + 2,
+                           me_choice == "scissors" ~ score + 3),
+         score = case_when(winner == "draw" ~ score + 3,
+                           winner == "me" ~ score + 6,
+                           T ~ score))
+
+head(df)
+```
+
+### part 1 solution
+
+```{r}
+sum(df$score)
+```
+
+### reverting to older version of data
+
+```{r}
+df = data.frame(input) |>
+  separate(input, into = c("opponent", "outcome"), sep = " ") |>
+  mutate(opponent_choice = case_when(opponent == "A" ~ "rock",
+                                     opponent == "B" ~ "paper",
+                                     opponent == "C" ~ "scissors"))
+
+head(df)
+```
+
+### creating desired outcome variable
+
+```{r}
+df = df |>
+  mutate(desired_outcome = case_when(outcome == "X" ~ "lose",
+                                     outcome == "Y" ~ "draw",
+                                     outcome == "Z" ~ "win"))
+
+head(df)
+```
+
+### deciding what shape we need to choose for desired outcome
+
+```{r}
+df = df |>
+  mutate(me_choice = case_when(desired_outcome == "draw" ~ opponent_choice,
+                               desired_outcome == "lose" & opponent_choice == "rock" ~ "scissors",
+                               desired_outcome == "lose" & opponent_choice == "paper" ~ "rock",
+                               desired_outcome == "lose" & opponent_choice == "scissors" ~ "paper",
+                               desired_outcome == "win" & opponent_choice == "rock" ~ "paper",
+                               desired_outcome == "win" & opponent_choice == "paper" ~ "scissors",
+                               desired_outcome == "win" & opponent_choice == "scissors" ~ "rock"))
+
+head(df)
+```
+
+### recreating winner variable and calculating new total score
+
+```{r}
+df = df |>
+  mutate(winner = case_when(opponent_choice == "paper" & me_choice == "paper" ~ "draw",
+                            opponent_choice == "paper" & me_choice == "rock" ~ "opponent",
+                            opponent_choice == "paper" & me_choice == "scissors" ~ "me",
+                            opponent_choice == "rock" & me_choice == "paper" ~ "me",
+                            opponent_choice == "rock" & me_choice == "rock" ~ "draw",
+                            opponent_choice == "rock" & me_choice == "scissors" ~ "opponent",
+                            opponent_choice == "scissors" & me_choice == "paper" ~ "opponent",
+                            opponent_choice == "scissors" & me_choice == "rock" ~ "me",
+                            opponent_choice == "scissors" & me_choice == "scissors" ~ "draw"),
+         score = 0,
+         score = case_when(me_choice == "rock" ~ score + 1,
+                           me_choice == "paper" ~ score + 2,
+                           me_choice == "scissors" ~ score + 3),
+         score = case_when(winner == "draw" ~ score + 3,
+                           winner == "me" ~ score + 6,
+                           T ~ score))
+
+head(df)
+```
+
+### part 2 solution
+
+```{r}
+sum(df$score)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
