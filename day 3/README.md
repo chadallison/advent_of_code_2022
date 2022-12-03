@@ -169,6 +169,7 @@ for (i in 1:100) {
 
   groups_priority$item[i] = item
   groups_priority$priority[i] = priority
+  
 }
 
 head(groups_priority)
