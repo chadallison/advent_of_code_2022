@@ -1,0 +1,172 @@
+---
+title: "advent of code - day 3"
+author: "chad allison | 3 december 2022"
+output: github_document
+---
+
+### loading tidyverse
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### importing and previewing the input data
+
+```{r}
+input = readLines("day3_input.txt")
+df = data.frame(items = input)
+
+head(df)
+```
+
+### splitting the data into the two compartments
+
+```{r}
+df = df |>
+  mutate(comp1 = substr(items, 1, nchar(items) / 2),
+         comp2 = substr(items, (nchar(items) / 2 + 1), nchar(items))) |>
+  select(comp1, comp2)
+
+head(df)
+```
+
+### identifying common item between compartments
+
+```{r}
+df$common_item = NA
+
+for (i in 1:nrow(df)) {
+  for (j in 1:nchar(df$comp1)[i]) {
+    letter = substr(df$comp1[i], j, j)
+    df$common_item[i] = ifelse(str_detect(df$comp2[i], letter), letter, df$common_item[i])
+  }
+}
+
+df = df |>
+  select(comp1, comp2, common_item)
+
+head(df)
+```
+
+### creating data frame for items & priorities
+
+```{r}
+alphabet_lower = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+                   "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z")
+
+alphabet_upper = str_to_upper(alphabet_lower)
+
+item_priorities = rbind(data.frame(item = alphabet_lower), data.frame(item = alphabet_upper)) |>
+  mutate(priority = 1:52)
+
+head(item_priorities)
+```
+
+### joining together data frames to get item values
+
+```{r}
+df = df |>
+  left_join(item_priorities, by = c("common_item" = "item"))
+
+head(df)
+```
+
+### part 1 solution 
+
+```{r}
+sum(df$priority)
+```
+
+### creating elf groups
+
+```{r}
+groups_df = data.frame(group = NULL)
+
+for (i in 1:100) {
+  group = data.frame(group = rep(i, times = 3))
+  groups_df = rbind(groups_df, group)
+}
+
+group_nums = groups_df |>
+  pull(group)
+
+df = df |>
+  mutate(items = paste0(comp1, comp2),
+         group = group_nums) |>
+  select(items, group)
+
+head(df)
+```
+
+### finding the common item and its value between each of the groups
+
+```{r}
+groups_priority = data.frame(group = 1:100, item = NA, priority = NA)
+
+for (i in 1:100) {
+  
+  data = df |>
+    filter(group == i)
+  
+  common_item = item_priorities |>
+    filter(item %in% str_split(data$items[1], pattern = "")[[1]] &
+           item %in% str_split(data$items[2], pattern = "")[[1]] &
+           item %in% str_split(data$items[3], pattern = "")[[1]])
+  
+  item = common_item |>
+    pull(item)
+  
+  priority = common_item |>
+    pull(priority)
+
+  groups_priority$item[i] = item
+  groups_priority$priority[i] = priority
+}
+
+head(groups_priority)
+```
+
+### part 2 solution
+
+```{r}
+sum(groups_priority$priority)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
