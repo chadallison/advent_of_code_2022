@@ -1,0 +1,99 @@
+---
+title: "advent of code - day 4"
+author: "chad allison | 4 december 2022"
+output: github_document
+---
+
+### loading tidyverse)
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### loading and previewing input data
+
+```{r}
+input = readLines("day4_input.txt")
+df = data.frame(pairs = input)
+
+head(df)
+```
+
+### splitting the pairs
+
+```{r}
+df = df |>
+  separate(pairs, into = c("p1", "p2"), sep = ",")
+
+head(df)
+```
+
+### saving original pairs and further splitting the pairs
+
+```{r}
+p1 = df |>
+  pull(p1)
+
+p2 = df |>
+  pull(p2)
+
+df = df |>
+  separate(p1, into = c("min1", "max1"), sep = "-") |>
+  separate(p2, into = c("min2", "max2"), sep = "-")
+
+head(df)
+```
+
+### determining how many pair ranges fully contain the other
+
+```{r}
+df = df |>
+  mutate(p1_contains_p2 = ifelse(min1 <= min2 & max1 >= max2, 1, 0),
+         p2_contains_p1 = ifelse(min2 <= min1 & max2 >= max1, 1, 0)) |>
+  mutate(one_contains_other = ifelse(p1_contains_p2 == 1 | p2_contains_p1 == 1, 1, 0))
+
+head(df)
+```
+
+### part 1 solution
+
+```{r}
+sum(df$one_contains_other) ### 493 too high - am i double counting?
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
