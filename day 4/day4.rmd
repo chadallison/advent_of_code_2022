@@ -28,18 +28,13 @@ df = df |>
 head(df)
 ```
 
-### saving original pairs and further splitting the pairs
+### further splitting the pairs
 
 ```{r}
-p1 = df |>
-  pull(p1)
-
-p2 = df |>
-  pull(p2)
-
 df = df |>
   separate(p1, into = c("min1", "max1"), sep = "-") |>
-  separate(p2, into = c("min2", "max2"), sep = "-")
+  separate(p2, into = c("min2", "max2"), sep = "-") |>
+  mutate_all(as.numeric)
 
 head(df)
 ```
@@ -49,8 +44,8 @@ head(df)
 ```{r}
 df = df |>
   mutate(p1_contains_p2 = ifelse(min1 <= min2 & max1 >= max2, 1, 0),
-         p2_contains_p1 = ifelse(min2 <= min1 & max2 >= max1, 1, 0)) |>
-  mutate(one_contains_other = ifelse(p1_contains_p2 == 1 | p2_contains_p1 == 1, 1, 0))
+         p2_contains_p1 = ifelse(min2 <= min1 & max2 >= max1, 1, 0),
+         same_pair = ifelse(min1 == min2 & max1 == max2, 1, 0))
 
 head(df)
 ```
@@ -58,10 +53,25 @@ head(df)
 ### part 1 solution
 
 ```{r}
-sum(df$one_contains_other) ### 493 too high - am i double counting?
+sum(df$p1_contains_p2) + sum(df$p2_contains_p1) - sum(df$same_pair)
 ```
 
+### creating variable for no overlap, then overlap
 
+```{r}
+df = df |>
+  select(-same_pair) |>
+  mutate(no_overlap = ifelse(max1 < min2 | min1 > max2, 1, 0),
+         overlap = ifelse(no_overlap == 0, 1, 0))
+
+head(df)
+```
+
+### part 2 solution
+
+```{r}
+sum(df$overlap)
+```
 
 
 
