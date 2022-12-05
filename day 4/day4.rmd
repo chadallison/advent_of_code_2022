@@ -4,7 +4,7 @@ author: "chad allison | 4 december 2022"
 output: github_document
 ---
 
-### loading tidyverse)
+### loading tidyverse
 
 ```{r message = F, warning = F}
 library(tidyverse)

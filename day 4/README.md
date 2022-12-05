@@ -2,7 +2,7 @@ advent of code - day 4
 ================
 chad allison \| 4 december 2022
 
-### loading tidyverse)
+### loading tidyverse
 
 ``` r
 library(tidyverse)
