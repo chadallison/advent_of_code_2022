@@ -1,0 +1,168 @@
+---
+title: "advent of code - day 5"
+author: "chad allison | 5 december 2022"
+output: github_document
+---
+
+### loading tidyverse
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### loading the input data
+
+```{r}
+input = readLines("day5_input.txt")
+
+input[1:30]
+```
+
+### splitting the input into two data frames
+
+```{r}
+moves = data.frame(moves = input[11:length(input)])
+
+stacks = input[1:8] |>
+  paste(collapse = "\n") |>
+  read_fwf(show_col_types = F) |>
+  set_names(paste0("s", 1:9))
+
+head(moves)
+stacks
+```
+
+### reformatting the `moves` data frame
+
+```{r}
+moves = moves |>
+  separate(moves, into = c("move", "from"), sep = "from") |>
+  separate(from, into = c("from", "to"), sep = "to") |>
+  mutate(move = str_remove(move, "move"),
+         move = as.numeric(move),
+         from = as.numeric(from),
+         to = as.numeric(to))
+
+head(moves)
+```
+
+### converting the stacks into lists
+
+```{r}
+stacks_list = stacks |>
+  as.list(col) |>
+  map(na.omit)
+
+head(stacks_list[[1]])
+```
+
+### creating function for making a move
+
+```{r}
+make_move = function(sl, move, from, to) {
+  crates = head(sl[[from]], move)
+  sl[[from]] = tail(sl[[from]], -move)
+  sl[[to]] = c(rev(crates), sl[[to]])
+  
+  sl
+}
+
+sl = stacks_list
+```
+
+### applying function to data
+
+```{r}
+for (i in 1:nrow(moves)) {
+  sl = make_move(sl, moves$move[i], moves$from[i], moves$to[i])
+}
+
+sl
+```
+
+### part 1 solution
+
+```{r}
+top_stacks = ""
+
+for (i in 1:9) {
+  top_stacks = paste0(top_stacks, str_remove_all(sl[[i]][1], "\\[|\\]"))
+}
+
+top_stacks
+```
+
+### creating function for part 2
+
+```{r}
+make_move2 = function (sl, move, from, to) {
+  crates = head(sl[[from]], move)
+  sl[[from]] = tail(sl[[from]], -move)
+  sl[[to]] = c(crates, sl[[to]])
+  
+  sl
+}
+
+sl = stacks_list
+```
+
+### applying the new function to the data
+
+```{r}
+for (i in 1:nrow(moves)) {
+  sl = make_move2(sl, moves$move[i], moves$from[i], moves$to[i])
+}
+```
+
+### part 2 solution
+
+```{r}
+top_stacks = ""
+
+for (i in 1:9) {
+  top_stacks = paste0(top_stacks, str_remove_all(sl[[i]][1], "\\[|\\]"))
+}
+
+top_stacks
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
