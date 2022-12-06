@@ -1,0 +1,171 @@
+---
+title: "advent of code - day 6"
+author: "chad allison | 6 december 2022"
+output: github_document
+---
+
+### loading tidyverse
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### loading input data
+
+```{r}
+input = readLines("day6_input.txt")
+
+input
+```
+
+### creating empty data frame to track each marker
+
+```{r}
+df = data.frame(marker = rep(NA, times = nchar(input) - 3), marker_num = NA, n_processed = NA)
+
+head(df)
+```
+
+### creating function to check if four characters are all different
+
+```{r}
+check_diff = function(x) {
+  
+  return(substr(x, 1, 1) != substr(x, 2, 2) & substr(x, 1, 1) != substr(x, 3, 3) &
+           substr(x, 1, 1) != substr(x, 4, 4) & substr(x, 2, 2) != substr(x, 3, 3) &
+           substr(x, 2, 2) != substr(x, 4, 4) & substr(x, 3, 3) != substr(x, 4, 4))
+  
+}
+
+check_diff("abcc")
+check_diff("abcd")
+```
+
+### filling data frame with each four-character marker
+
+```{r}
+for (i in 1:nrow(df)) {
+  
+  df$marker[i] = substr(input, i, i + 3)
+  df$marker_num[i] = i
+  df$n_processed[i] = i + 3
+  
+}
+
+head(df)
+```
+
+### applying function to data
+
+```{r}
+df = df |>
+  mutate(all_different = check_diff(marker))
+
+head(df)
+```
+
+### part 1 solution
+
+```{r}
+df |>
+  filter(all_different) |>
+  pull(n_processed) |>
+  head(1)
+```
+
+```{r}
+string = "abcdefghijj"
+
+data.frame(letters = str_split(string, pattern = "")[[1]]) |>
+  count(letters) |>
+  arrange(desc(n)) |>
+  pull(n) |>
+  head(1)
+```
+
+### recreating data frame with all possible markers
+
+```{r}
+df = data.frame(marker = rep(NA, times = nchar(input) - 13), marker_num = NA, n_processed = NA)
+
+head(df)
+```
+
+### creating function to check if all fourteen characters are different
+
+```{r}
+check_diff2 = function(x) {
+  
+  count = data.frame(letters = str_split(x, pattern = "")[[1]]) |>
+    count(letters) |>
+    nrow()
+
+  return(count == nchar(x))
+  
+}
+
+check_diff2("abcdefghijklmm")
+check_diff2("abcdefghijklmn")
+```
+
+### filling data frame with each fourteen-character marker
+
+```{r}
+for (i in 1:nrow(df)) {
+  
+  df$marker[i] = substr(input, i, i + 13)
+  df$marker_num[i] = i
+  df$n_processed[i] = i + 13
+  
+}
+
+head(df)
+```
+
+### applying function to data
+
+```{r}
+df = df |>
+  mutate(all_different = check_diff2(marker))
+
+head(df)
+```
+
+### part 2 solution
+
+```{r}
+all_markers = df |>
+  pull(marker)
+
+for (i in 1:length(all_markers)) {
+  
+  if (check_diff2(all_markers[i])) {
+    
+    print(i + 13)
+    break
+  
+  }
+  
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
