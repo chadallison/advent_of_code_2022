@@ -106,18 +106,6 @@ df |>
 
     ## [1] 1544
 
-``` r
-string = "abcdefghijj"
-
-data.frame(letters = str_split(string, pattern = "")[[1]]) |>
-  count(letters) |>
-  arrange(desc(n)) |>
-  pull(n) |>
-  head(1)
-```
-
-    ## [1] 2
-
 ### recreating data frame with all possible markers
 
 ``` r
