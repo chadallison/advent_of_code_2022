@@ -184,35 +184,30 @@ head(df)
 
 ``` r
 df = df |>
+  rowwise() |>
   mutate(all_different = check_diff2(marker))
 
 head(df)
 ```
 
-    ##           marker marker_num n_processed all_different
-    ## 1 mgwwjddqzqdqss          1          14         FALSE
-    ## 2 gwwjddqzqdqsst          2          15         FALSE
-    ## 3 wwjddqzqdqsstc          3          16         FALSE
-    ## 4 wjddqzqdqsstct          4          17         FALSE
-    ## 5 jddqzqdqsstctj          5          18         FALSE
-    ## 6 ddqzqdqsstctjj          6          19         FALSE
+    ## # A tibble: 6 x 4
+    ## # Rowwise: 
+    ##   marker         marker_num n_processed all_different
+    ##   <chr>               <int>       <dbl> <lgl>        
+    ## 1 mgwwjddqzqdqss          1          14 FALSE        
+    ## 2 gwwjddqzqdqsst          2          15 FALSE        
+    ## 3 wwjddqzqdqsstc          3          16 FALSE        
+    ## 4 wjddqzqdqsstct          4          17 FALSE        
+    ## 5 jddqzqdqsstctj          5          18 FALSE        
+    ## 6 ddqzqdqsstctjj          6          19 FALSE
 
 ### part 2 solution
 
 ``` r
-all_markers = df |>
-  pull(marker)
-
-for (i in 1:length(all_markers)) {
-  
-  if (check_diff2(all_markers[i])) {
-    
-    print(i + 13)
-    break
-  
-  }
-  
-}
+df |>
+  filter(all_different) |>
+  pull(n_processed) |>
+  head(1)
 ```
 
     ## [1] 2145

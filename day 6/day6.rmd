@@ -126,6 +126,7 @@ head(df)
 
 ```{r}
 df = df |>
+  rowwise() |>
   mutate(all_different = check_diff2(marker))
 
 head(df)
@@ -134,19 +135,10 @@ head(df)
 ### part 2 solution
 
 ```{r}
-all_markers = df |>
-  pull(marker)
-
-for (i in 1:length(all_markers)) {
-  
-  if (check_diff2(all_markers[i])) {
-    
-    print(i + 13)
-    break
-  
-  }
-  
-}
+df |>
+  filter(all_different) |>
+  pull(n_processed) |>
+  head(1)
 ```
 
 
