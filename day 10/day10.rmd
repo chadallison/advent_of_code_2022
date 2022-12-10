@@ -1,0 +1,130 @@
+---
+title: "advent of code - day 10"
+author: "chad allison | 10 december 2022"
+output: github_document
+---
+
+### loading tidyverse
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### loading the input data
+
+```{r}
+input = readLines("day10_input.txt")
+input[1:25]
+```
+
+### formatting input as data frame
+
+```{r}
+df = data.frame(input) |>
+  mutate(input = ifelse(input == "noop", "noop 0", input)) |>
+  separate(input, into = c("command", "value"), sep = " ", convert = T)
+
+head(df)
+```
+
+### creating a data frame for the cycle time
+
+```{r}
+cycle_time = data.frame(command = c("noop", "addx"),
+                        cycle = c(1, 2))
+
+cycle_time
+```
+
+### creating `id`, `cycle`, `register`, and `signal_strength` variables
+
+```{r}
+cpu = df |>
+  left_join(cycle_time, by = "command") |>
+  mutate(id = row_number()) |>
+  uncount(cycle) |>
+  mutate(cycle = row_number(),
+         register = cumsum(ifelse(id != lag(id, default = -1), lag(value, default = 0), 0)) + 1,
+         signal_strength = register * cycle)
+
+head(cpu)
+```
+
+### part 1 solution
+
+```{r}
+cpu |>
+  filter(cycle %in% c(20, 60, 100, 140, 180, 220)) |>
+  summarise(sum = sum(signal_strength)) |>
+  pull(sum)
+```
+
+### creating grid with image content
+
+```{r}
+crt = cpu |>
+  transmute(row = (cycle - 1) %/% 40,
+            col = (cycle - 1) %% 40,
+            draw = ifelse(col >= register - 1 & col <= register + 1, "#", " "))
+
+head(crt)
+```
+
+### reformatting data
+
+```{r}
+crt = crt |>
+  pivot_wider(names_from = "col", values_from = "draw") |>
+  select(-row) |>
+  as.matrix() |>
+  apply(MARGIN = 1, \(x) paste(x, collapse = ""))
+
+crt
+```
+
+### part 2 solution
+
+```{r}
+cat(crt, sep = "\n")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
