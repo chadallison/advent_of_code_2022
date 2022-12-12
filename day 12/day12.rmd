@@ -1,0 +1,122 @@
+---
+title: "advent of code - day 12"
+author: "chad allison | 12 december 2022"
+output: github_document
+---
+
+### loading `tidyverse` and `igraph`
+
+```{r message = F, warning = F}
+library(tidyverse)
+library(igraph)
+```
+
+### loading input data
+
+```{r}
+input = readLines("day12_input.txt")
+input[1:5]
+```
+
+### formatting input
+
+```{r}
+x = input |>
+  strsplit("") |>
+  sapply(match, c("S", letters, "E"))
+
+x[1:10, 1:10]
+```
+
+### computing edge list
+
+```{r}
+edgelist = lapply(seq(x), \(s) {
+  i = row(x)[s]
+  j = col(x)[s]
+  height = x[i, j]
+  walkable = which(abs(row(x) - i) + abs(col(x) - j) == 1 & x - height <= 1)
+  expand.grid(s, walkable)
+})
+
+edgelist[[1]]
+```
+
+### creating graph object from `igraph`
+
+```{r}
+g = do.call(rbind, edgelist) |>
+  as.matrix() |>
+  graph_from_edgelist()
+
+g
+```
+
+### part 1 solution
+
+```{r}
+shortest_paths(g, from = which.min(x), to = which.max(x))$vpath[[1]] |>
+  tail(-1) |>
+  length()
+```
+
+### finding shortest path
+
+```{r}
+sol = sapply(which(x <= 2), \(i) {
+  steps = shortest_paths(g, from = i, to = which.max(x))$vpath[[1]] |>
+    suppressWarnings() |>
+    tail(-1) |>
+    length()
+  
+  ifelse(steps == 0, Inf, steps)
+})
+
+sol[sol != Inf]
+```
+
+### part 2 solution
+
+```{r}
+min(sol)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
