@@ -1,0 +1,145 @@
+---
+title: "advent of code - day 14"
+author: "chad allison | 14 december 2022"
+output: github_document
+---
+
+### loading tidyverse
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### loading input
+
+```{r}
+input = data.frame(x = readLines("day14_input.txt"))
+
+head(input) |>
+  pull(x)
+```
+
+### finding blocked spots
+
+```{r}
+blocked = input |>
+  mutate(row = row_number()) |>
+  separate_rows(x, sep = " -> ") |>
+  separate(x, into = c("x_start", "y_start"), convert = T) |>
+  group_by(row) |>
+  mutate(x_end = lead(x_start),
+         y_end = lead(y_start)) |>
+  filter(!is.na(x_end)) |>
+  mutate(x = map2(x_start, x_end, seq),
+         y = map2(y_start, y_end, seq)) |>
+  unnest(c(x, y))
+
+head(blocked)
+```
+
+### creating move list
+
+```{r}
+moves = list(cbind(0, 1), # down
+             cbind(-1, 1), # down & left
+             cbind(1, 1)) # down & right
+
+moves
+```
+
+### creating function for next sand position
+
+```{r}
+next_sand = function(m) {
+  position = cbind(500, 0) # start
+  moved = T
+  while (moved) {
+    moved = F
+    for (move in moves) {
+      if (m[position + move] == 0) {
+        position = position + move
+        moved = T
+      }
+    }
+  }
+  return(position)
+}
+```
+
+### creating movement matrix
+
+```{r}
+# 0 is empty
+# 1 is rock
+# 2 is sand
+m = matrix(0, nrow = max(blocked$x) * 3, ncol = max(blocked$y) + 2)
+m[cbind(blocked$x, blocked$y)] = 1
+m[, max(blocked$y) + 2] = 1
+
+m[1:5, 1:5]
+```
+
+### making moves
+
+```{r}
+while (T) {
+  pos = next_sand(m)
+  m[pos] = 2
+  if (pos[2] == 0) {
+    break
+  }
+}
+```
+
+### solution
+
+```{r}
+sum(m == 2) + 1
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
