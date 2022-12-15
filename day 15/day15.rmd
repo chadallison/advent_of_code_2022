@@ -1,0 +1,123 @@
+---
+title: "advent of code - day 15"
+author: "chad allison | 15 december 2022"
+output: github_document
+---
+
+### loading packages
+
+```{r message = F, warning = F}
+library(tidyverse)
+library(ivs)
+```
+
+### loading input data
+
+```{r}
+input = data.frame(x = readLines("day15_input.txt"))
+
+head(input)
+```
+
+### formatting input data
+
+```{r}
+input = input |>
+  separate(x, into = c("sensor", "beacon"), sep = ":") |>
+  separate(sensor, into = c("sensor_x", "sensor_y"), sep = ",") |>
+  separate(beacon, into = c("beacon_x", "beacon_y"), sep = ",") |>
+  mutate(sensor_x = as.numeric(str_remove_all(sensor_x, "Sensor at x=")),
+         sensor_y = as.numeric(str_remove_all(sensor_y, "y=")),
+         beacon_x = as.numeric(str_remove_all(beacon_x, "closest beacon is at x=")),
+         beacon_y = as.numeric(str_remove_all(beacon_y, "y=")),
+         dist = abs(sensor_x - beacon_x) + abs(sensor_y - beacon_y))
+
+head(input)
+```
+
+### visualising input data
+
+```{r}
+input |>
+  transmute(sensor = paste0(sensor_x, ", ", sensor_y),
+            beacon = paste0(beacon_x, ", ", beacon_y)) |>
+  pivot_longer(everything(), names_to = "type", values_to = "coord") |>
+  separate(coord, into = c("x", "y"), sep = ", ", convert = T) |>
+  ggplot(aes(x, y)) +
+  geom_point(aes(col = type), size = 4, shape = 8) +
+  scale_color_manual(values = c("indianred3", "springgreen4")) +
+  theme_minimal() +
+  labs(title = "beacon and sensor locations", col = NULL,
+       x = "x coordinate", y = "y coordinate") +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.text = element_blank(),
+        legend.position = "bottom")
+```
+
+### part 1 solution
+
+```{r}
+target_y = 2000000
+
+input |>
+  mutate(dist_y = abs(sensor_y - target_y)) |>
+  mutate(left = if_else(dist - dist_y < 0, NA_real_, sensor_x - (dist - dist_y)),
+         right = if_else(dist - dist_y < 0, NA_real_, sensor_x + (dist - dist_y) + 1)) |>
+  filter(!is.na(left)) |>
+  mutate(target_iv = iv(left, right)) |>
+  summarise(union_intervals = iv_groups(target_iv)) |>
+  mutate(s = iv_start(union_intervals), e = iv_end(union_intervals)) |>
+  mutate(L = e - s - 1) |>
+  pull(L)
+```
+
+### this takes a while to run
+
+```{r eval = F, include = T}
+xs = input$sensor_x
+ys = input$sensor_y
+dist = input$dist
+grid_max = 4000000
+
+system.time(
+  res <- invisible(lapply(0:grid_max, function(grid_y) {
+  if (grid_y %% 10000 == 0) message(Sys.time(), ": ", grid_y)
+  dist_y <- abs(ys - grid_y)
+  left <- if_else(dist - dist_y < 0, NA_real_, pmax(xs - (dist - dist_y), 0))
+  right <- if_else(dist - dist_y < 0, NA_real_, pmin(xs + (dist - dist_y) + 1, grid_max + 1))
+  valid <- !is.na(left) & !is.na(right) & left < right
+  union_of_intervals <- iv_groups(iv(left[valid], right[valid]))
+  if (length(union_of_intervals) == 1) return(NULL)
+  distress <- iv_start(iv_complement(union_of_intervals))
+  result <- distress * 4000000 + grid_y
+  cat("\n\nResult:", result, "\n\n")
+  result
+  })))
+```
+
+### part 2 solution
+
+```{r eval = F, include = T}
+# compact(res)[[1]]
+print(10621647166538)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
