@@ -1,0 +1,231 @@
+---
+title: "advent of code - day 16"
+author: "chad allison | 16 december 2022"
+output: github_document
+---
+
+### loading packages
+
+```{r message = F, warning = F}
+library(tidyverse)
+library(dtplyr)
+```
+
+### loading input data
+
+```{r}
+input = readLines("day16_input.txt")
+
+input[1:10]
+```
+
+### formatting input
+
+```{r}
+input = input |>
+  str_replace_all("Valve |has flow rate=|;|,|tunnel(s)? lead(s)? to valve(s)? ", "") |>
+  str_split(" ")
+
+input[1:5]
+```
+
+### getting flow rates
+
+```{r}
+flow_rates = lapply(input, function(line) {
+  tibble(valve = line[1],
+         amount = line[2] %>%
+           as.numeric)}) |>
+  bind_rows() |>
+  filter(amount > 0)
+
+head(flow_rates)
+```
+
+### getting list of paths
+
+```{r}
+path_list = lapply(input, function(line) {
+  tibble(from = line[1],
+         to = line[-1:-2])}) |>
+  bind_rows()
+
+head(path_list)
+```
+
+### setting current position
+
+```{r}
+current_position = tibble(curr_pos = "AA",
+                          valves_open = "",
+                          steam_per_turn = 0,
+                          steam_till_now = 0)
+
+current_position
+```
+
+### part 1 logic
+
+```{r}
+for (i in 1:30) {
+  
+  current_position = rbind(current_position |>
+                             left_join(path_list, by = c("curr_pos" = "from")) |>
+                             mutate(curr_pos = to, to = NULL),
+                           current_position |>
+                             filter(!str_detect(valves_open, curr_pos)) |>
+                             mutate(valves_open = paste0(valves_open, " ", curr_pos)) |>
+                             inner_join(flow_rates, by = c("curr_pos" = "valve")) |>
+                             mutate(steam_per_turn = steam_per_turn + amount,
+                                    steam_till_now = steam_till_now - amount,
+                                    amount = NULL)) |>
+    mutate(steam_till_now = steam_till_now + steam_per_turn) |>
+    lazy_dt() |>
+    group_by(curr_pos, valves_open, steam_per_turn) |>
+    summarise(steam_till_now = max(steam_till_now),
+              .groups = "drop") |>
+    collect()
+  
+  if (i > 20) {
+    
+    too_low = max(current_position$steam_till_now) - (31 - i) * 100
+    
+    current_position = current_position |>
+      filter(steam_till_now > too_low)
+  
+  }
+  
+  print(paste0(i, " ", nrow(current_position)))
+  
+}
+```
+
+### part 1 solution
+
+```{r}
+max(current_position$steam_till_now)
+```
+
+### setting current position for part 2
+
+```{r}
+current_position = tibble(curr_pos_1 = "AA",
+                          curr_pos_2 = "AA",
+                          valves_open = "",
+                          steam_per_turn = 0,
+                          steam_till_now = 0)
+
+current_position
+```
+
+### part 2 logic
+
+```{r}
+for (i in 1:26) {
+  
+  current_position = rbind(current_position |>
+                             left_join(path_list, by = c("curr_pos_1" = "from")) |>
+                             mutate(curr_pos_1 = to, to = NULL),
+                           current_position |>
+                             filter(!str_detect(valves_open, curr_pos_1)) |>
+                             mutate(valves_open = paste0(valves_open, " ", curr_pos_1)) |>
+                             inner_join(flow_rates, by = c("curr_pos_1" = "valve")) |>
+                             mutate(steam_per_turn = steam_per_turn + amount,
+                                    steam_till_now = steam_till_now - amount,
+                                    amount = NULL))
+  
+  current_position = rbind(current_position |>
+                             left_join(path_list, by = c("curr_pos_2" = "from")) |>
+                             mutate(curr_pos_2 = to, to = NULL),
+                           current_position |>
+                             filter(!str_detect(valves_open, curr_pos_2)) |>
+                             mutate(valves_open = paste0(valves_open, " ", curr_pos_2)) |>
+                             inner_join(flow_rates, by = c("curr_pos_2" = "valve")) |>
+                             mutate(steam_per_turn = steam_per_turn + amount,
+                                    steam_till_now = steam_till_now - amount,
+                                    amount = NULL))
+  
+  current_position = current_position |>
+    mutate(tmp = if_else(curr_pos_1 > curr_pos_2, curr_pos_2, curr_pos_1),
+           curr_pos_2 = if_else(curr_pos_1 > curr_pos_2, curr_pos_1, curr_pos_2),
+           curr_pos_1 = tmp,
+           tmp = NULL)
+  
+  current_position = current_position |>
+    mutate(steam_till_now = steam_till_now + steam_per_turn) |>
+    lazy_dt() |>
+    group_by(curr_pos_1, curr_pos_2, valves_open, steam_per_turn) |>
+    summarise(steam_till_now = max(steam_till_now),
+              .groups = "drop") |>
+    collect()
+  
+  if (i > 10) {
+    
+    too_low = max(current_position$steam_till_now) - (27 - i) * 50
+    
+    current_position = current_position |>
+      filter(steam_till_now > too_low)
+    
+  }
+  
+  current_position = current_position |>
+    arrange(desc(steam_till_now)) |>
+    slice(1:max(100, nrow(current_position) * 0.5))
+  
+  print(paste0(i, " ", nrow(current_position)))
+  
+}
+```
+
+### part 2 solution
+
+```{r}
+max(current_position$steam_till_now)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
