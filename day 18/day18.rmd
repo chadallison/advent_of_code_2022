@@ -1,0 +1,140 @@
+---
+title: "advent of code - day 18"
+author: "chad allison | 18 december 2022"
+output: github_document
+---
+
+### loading tidyverse
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### loading input data
+
+```{r}
+input = readLines("input.txt")
+input[1:50]
+```
+
+### formatting input data
+
+```{r}
+df = data.frame(input) |>
+  separate(input, into = c("a", "b", "c"), sep = ",", convert = T)
+
+head(df)
+```
+
+### creating neighbors function
+
+```{r}
+neighbors = function(a, b, c, mat) {
+  x = (abs(mat$a - a) + abs(mat$b - b) + abs(mat$c - c)) == 1
+  return(sum(x))
+}
+```
+
+### part 1 solution
+
+```{r}
+sum(6 - pmap_dbl(df, neighbors, mat = df))
+```
+
+### creating all possible spaces
+
+```{r}
+possible_spaces = crossing(a = seq_len(max(df$a)),
+                           b = seq_len(max(df$b)),
+                           c = seq_len(max(df$c)))
+
+possible_spaces[sample(1:nrow(possible_spaces), size = 10), ]
+```
+
+### creating next_points function & essential tibbles
+
+```{r}
+next_points = function(x, y, z) {
+  tibble(a = c(-1, 0, 0, 0, 0, 1) + x, 
+         b = c(0, -1, 0, 0, 1, 0) + y, 
+         c = c(0, 0, -1, 1, 0, 0) + z) |> 
+    filter(a >= 0, b >= 0, c >= 0, a <= 20, b <= 20, c <= 20) |> 
+    anti_join(df, by = c("a", "b", "c")) |> 
+    anti_join(checked, by = c("a", "b", "c")) |> 
+    anti_join(queue, by = c("a", "b", "c"))
+}
+
+checked = tibble(a = numeric(), b = numeric(), c = numeric())
+queue = tibble(a = 0, b = 0, c = 0)
+counter = 0
+```
+
+### finding filled spaces
+
+```{r}
+while (nrow(queue) > 0) {
+  counter = counter + 1
+  if (counter %% 100 == 0) print(counter)
+  x = next_points(queue$a[1], queue$b[1], queue$c[1])
+  
+  checked = checked |>
+    bind_rows(queue |> slice(1))
+  
+  queue = queue |>
+    slice(-1) |> 
+    bind_rows(x)
+}
+
+filled_spaces = possible_spaces |> 
+  anti_join(checked, by = c("a", "b", "c")) |>
+  anti_join(df, by = c("a", "b", "c")) |> 
+  bind_rows(df)
+
+filled_spaces[sample(1:nrow(filled_spaces), size = 10), ]
+```
+
+### part 2 solution
+
+```{r}
+sum(6 - pmap_dbl(filled_spaces, neighbors, mat = filled_spaces))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
