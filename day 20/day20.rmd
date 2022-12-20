@@ -1,0 +1,125 @@
+---
+title: "advent of code - day 20"
+author: "chad allison | 20 december 2022"
+output: github_document
+---
+
+### loading tidyverse
+
+```{r message = F, warning = F}
+library(tidyverse)
+```
+
+### loading input data
+
+```{r}
+input = readLines("input.txt")
+input[1:100]
+```
+
+### formatting input data
+
+```{r}
+input = as.numeric(input)
+len = length(input)
+names(input) = 1:len
+input[1:100]
+```
+
+### creating `mix_one` function
+
+```{r}
+mix_one = function(vector, id) {
+  
+  where_currently = which(names(vector) == id)
+  moving_how_much = vector[[where_currently]] %% (len - 1)
+  
+  if (where_currently > 1) {
+    vector = c(vector[where_currently:len], vector[1:(where_currently - 1)])
+  }
+  
+  if (moving_how_much > 0) {
+    vector = c(vector[2:(moving_how_much + 1)], vector[1], vector[(moving_how_much + 2):len])
+  }
+  
+  return(vector)
+  
+}
+```
+
+### decryption for part 1
+
+```{r}
+p1 =  input
+
+for (i in 1:len) {
+  p1 = p1 |> mix_one(i)
+}
+
+where_0 = which(p1 == 0)
+```
+
+### part 1 solution
+
+```{r}
+sum(p1[(where_0 + 1000 - 1) %% len + 1],
+    p1[(where_0 + 2000 - 1) %% len + 1],
+    p1[(where_0 + 3000 - 1) %% len + 1])
+```
+
+### decryption for part 2
+
+```{r}
+decryption_key = 811589153
+p2 = input * decryption_key
+
+# this will take a minute or so to run
+for (j in 1:10) {
+  for (i in 1:len) {
+    p2 = p2 |> mix_one(i)
+  }
+}
+
+options(digits = 22)
+where_0 = which(p2 == 0)
+```
+
+### part 2 solution
+
+```{r}
+sum(p2[(where_0 + 1000 - 1) %% len + 1],
+    p2[(where_0 + 2000 - 1) %% len + 1],
+    p2[(where_0 + 3000 - 1) %% len + 1])
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
