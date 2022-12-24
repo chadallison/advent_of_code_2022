@@ -27,4 +27,6 @@ ___
 - [day 21](https://github.com/chadallison/advent_of_code_2022/tree/main/day%2021)
 - [day 22](https://github.com/chadallison/advent_of_code_2022/tree/main/day%2022)
 - [day 23](https://github.com/chadallison/advent_of_code_2022/tree/main/day%2023)
+- [day 24](https://github.com/chadallison/advent_of_code_2022/tree/main/day%2024)
+- [day 25](https://github.com/chadallison/advent_of_code_2022/tree/main/day%2025)
 
